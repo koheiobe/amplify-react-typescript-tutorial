@@ -1,0 +1,32 @@
+# This "input" configures a global authorization rule to enable public access to
+# all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
+input AMPLIFY {
+  globalAuthRule: AuthRule = { allow: public }
+} # FOR TESTING ONLY!
+type Post @model {
+  id: ID!
+  content: String!
+  owner: String!
+  image: String
+  status: PostStatus!
+    @index(
+      name: "SortByCreatedAt"
+      sortKeyFields: ["createdAt"]
+      queryField: "listPostsSortedByCreatedAt"
+    )
+  comments: [Comment] @hasMany(indexName: "byPost", fields: ["id"])
+  createdAt: AWSDateTime
+}
+
+enum PostStatus {
+  published
+  unpublished
+}
+
+type Comment @model {
+  id: ID!
+  postId: ID! @index(name: "byPost", sortKeyFields: ["content"])
+  content: String!
+  owner: String!
+  post: Post @hasOne(fields: ["postId"])
+}
